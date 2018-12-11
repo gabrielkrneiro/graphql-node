@@ -1,0 +1,29 @@
+version: '3'
+
+volumes: 
+  data:
+  
+services:
+  db:
+    image: mariadb
+    container_name: mariadb
+    restart: always
+    ports:
+      - 3306:3306
+    volumes: 
+      - /etc/mysql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=dbaunlocked28
+      - MYSQL_DATABASE=graphql_node
+
+  
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin
+    restart: always
+    ports:
+      - 8081:80
+    depends_on:
+      - db
+    links: 
+      - db
