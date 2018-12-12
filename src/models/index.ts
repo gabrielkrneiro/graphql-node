@@ -18,6 +18,11 @@ if(!db) {
 
     db = {};
 
+    // motivo: please use symbol based operators for better security...
+    // solucao: desativar a necessidade de usar tais operadores
+    const operatorAliases = false;
+    config = Object.assign({ operatorAliases }, config)
+
     const sequelize: Sequelize.Sequelize = new Sequelize(
         config.database,
         config.username,

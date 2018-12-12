@@ -9,7 +9,7 @@ import { onError, normalizePort, onListening } from './utils';
 const server = http.createServer(app);
 const port = normalizePort(process.env.port || 3000);
 
-db.sequelize.sync()
+db.sequelize.sync() // sync sequelize with database
     .then(() => {
         
         server.listen(port);

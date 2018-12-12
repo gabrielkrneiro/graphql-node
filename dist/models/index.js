@@ -12,6 +12,10 @@ let config = require(path.resolve(`${__dirname}./../config/config.json`))[env];
 let db = null;
 if (!db) {
     db = {};
+    // motivo: please use symbol based operators for better security...
+    // solucao: desativar a necessidade de usar tais operadores
+    const operatorAliases = false;
+    config = Object.assign({ operatorAliases }, config);
     const sequelize = new Sequelize(config.database, config.username, config.password, config);
     fs
         .readdirSync(__dirname) // retorna um array com o nome de todos os arquivos no diretorio passado como parametro
