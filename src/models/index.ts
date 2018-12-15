@@ -14,7 +14,7 @@ let config = require(path.resolve(`${__dirname}./../config/config.json`))[env];
 
 let db = null;
 
-if(!db) {
+if (!db) {
 
     db = {};
 
