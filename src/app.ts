@@ -17,8 +17,10 @@ class App {
 
     private middleware(): void {
 
+        // coloca a instancia do banco de dados de forma global na aplicacao
+        // exportando a instancia no parametro context da aplicacao
         this.express.use('/graphql', 
-            (req, res, next) => { // coloca a instancia do banco de dados de forma global na aplicacao
+            (req, res, next) => { 
                 req['context'] = {};
                 req['context'].db = db;
                 next();

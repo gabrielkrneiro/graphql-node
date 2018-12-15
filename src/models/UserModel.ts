@@ -61,6 +61,20 @@ export default (sequelize: Sequelize.Sequelize, DataTypes: Sequelize.DataTypes) 
 
                 const salt = genSaltSync();
                 user.password = hashSync(user.password, salt);
+            },
+
+            /**
+             *  se nao estiver sendo alterado a senha do usuario, nao eh necessario
+             *  fazer uma criptografia da senha. Sendo assim , evita-se criptografar
+             *  a senha ja criptografada
+             */
+            beforeUpdate: (user: UserInstance, options: Sequelize.CreateOptions) => {
+
+                if (user.changed('password')) {
+
+                    const salt = genSaltSync();
+                    user.password = hashSync(user.password, salt);
+                }
             } 
         }
     });
