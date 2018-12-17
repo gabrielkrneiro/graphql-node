@@ -3,6 +3,7 @@ import { DbConnection } from "../../../interfaces/DBConnectionInterface";
 import { UserInstance } from "../../../models/UserModel";
 import { Transaction } from "sequelize";
 import { userMutations } from "./user.schema";
+import { handleError } from "../../../utils";
 
 /**
  * 
@@ -32,6 +33,7 @@ export const userResolvers = {
                     limit: first,
                     offset: offset
                 })
+                .catch(handleError);
         }
     },
 
@@ -53,6 +55,7 @@ export const userResolvers = {
                     limit: first,
                     offset: offset
                  })
+                 .catch(handleError);
         },
  
         user: async (
@@ -62,20 +65,15 @@ export const userResolvers = {
             info: GraphQLResolveInfo
         ) => {
 
-            const user = await db.User.findById(id);
+            return db.User
+                .findById(id)
+                .then((user: UserInstance) => {
 
-            if (!user) throw new Error(`User with id ${ id } not found`);
+                    if (!user) throw new Error(`User with id ${ id } not found`);
 
-            return user;
-
-            // return db.User
-            //     .findById(id)
-            //     .then((user: UserInstance) => {
-
-            //         if (!user) throw new Error(`User with id ${ id } not found`);
-
-            //         return user;
-            //     })
+                    return user;
+                })
+                .catch(handleError);
             
         }
     },
@@ -108,6 +106,7 @@ export const userResolvers = {
                         .create(input, { transaction });
                 }
             )
+            .catch(handleError);
           },
 
           /**
@@ -133,6 +132,7 @@ export const userResolvers = {
                     return user.update(input, { transaction })
                 }
             )
+            .catch(handleError);
           },
 
           /**
@@ -158,6 +158,7 @@ export const userResolvers = {
                             .then((user: UserInstance) => !!user);
                     }
                 ) 
+                .catch(handleError);
            },
 
            /**
@@ -171,26 +172,21 @@ export const userResolvers = {
            ) => {
 
                 return db.sequelize.transaction(
-                    async (transaction: Transaction) => {
+                    (transaction: Transaction) => {
 
-                        const user: UserInstance = await db.User.findById(id);
+                        const user = db.User
+                            .findById(id)
+                            .then(
+                                (user: UserInstance) => {
 
-                        if (!user) throw new Error(`user with id ${ id } not found`);
+                                    if (!user) throw new Error(`user with id ${ id } not found`);
 
-                        return user.destroy({ transaction }).then(user => user);
-
-                        // const user = db.User
-                        //     .findById(id)
-                        //     .then(
-                        //         (user: UserInstance) => {
-
-                        //             if (!user) throw new Error(`user with id ${ id } not found`);
-
-                        //             return user.destroy({ transaction }).then(user => !!user);
-                        //         }
-                        //     );
+                                    return user.destroy({ transaction }).then(user => !!user);
+                                }
+                            );
                     }
                 )
+                .catch(handleError);
            },
 
 

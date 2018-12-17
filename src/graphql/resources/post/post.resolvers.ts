@@ -2,6 +2,7 @@ import { DbConnection } from '../../../interfaces/DBConnectionInterface';
 import { GraphQLResolveInfo } from 'graphql';
 import { PostInstance } from '../../../models/PostModel';
 import { Transaction } from 'sequelize';
+import { handleError } from '../../../utils';
 
 export const postResolvers = {
 
@@ -19,7 +20,9 @@ export const postResolvers = {
         ) => {
             // parent == current post instance
             // aqui o author == number == author.id
-            return db.User.findById(parent.get('author')); 
+            return db.User
+                .findById(parent.get('author'))
+                .catch(handleError);
         },
 
         comments: (
@@ -30,9 +33,12 @@ export const postResolvers = {
             info: GraphQLResolveInfo
         ) => {
 
-            return db.Comment.findAll({
-                where: { post: parent.get('id') }
-            })
+            return db.Comment
+                .findAll({
+                    where: { post: parent.get('id') }
+                })
+                .catch(handleError);
+
         },
     },
 
@@ -48,7 +54,9 @@ export const postResolvers = {
             info: GraphQLResolveInfo
         ) => {
 
-            return db.Post.findAll({ limit: first, offset })
+            return db.Post
+                .findAll({ limit: first, offset })
+                .catch(handleError);
         },
 
         post: (
@@ -67,6 +75,7 @@ export const postResolvers = {
                         return post;
                     }
                 )
+                .catch(handleError);
         }
     },
 
@@ -90,6 +99,7 @@ export const postResolvers = {
                         .create(input, { transaction });
                 }
             )
+            .catch(handleError);
         },
 
         updatePost: (
@@ -114,8 +124,8 @@ export const postResolvers = {
                                 return post.update(input, { transaction })
                             }
                         )
-                }
-            )
+            })
+            .catch(handleError);
         },
 
         deletePost: (
@@ -142,8 +152,8 @@ export const postResolvers = {
                                 return post.destroy({ transaction }).then(post => post)
                             }
                         )
-                }
-            )
+            })
+            .catch(handleError);
         }
      }
 
