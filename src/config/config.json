@@ -3,7 +3,7 @@
     "username": "root",
     "password": "dbaunlocked28",
     "database": "graphql_blog_development",
-    "host": "172.18.0.3",
+    "host": "172.18.0.2",
     "dialect": "mysql"
   },
   "test": {

@@ -79,7 +79,7 @@ export default (sequelize: Sequelize.Sequelize, DataTypes: Sequelize.DataTypes) 
         }
     });
 
-    const isPassword = (encodedPassword: string, password: string): boolean => {
+    function isPassword (encodedPassword: string, password: string): boolean  {
 
         return compareSync(password, encodedPassword);
     }

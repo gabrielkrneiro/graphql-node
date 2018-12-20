@@ -66,6 +66,8 @@ export const postResolvers = {
             info: GraphQLResolveInfo
         ) => {
 
+            id = parseInt(id);
+
             return db.Post
                 .findById(id)
                 .then(
@@ -149,7 +151,9 @@ export const postResolvers = {
 
 
                                 // should be .then(post => !!post)
-                                return post.destroy({ transaction }).then(post => post)
+                                return post
+                                    .destroy({ transaction })
+                                    .then(() => true)
                             }
                         )
             })

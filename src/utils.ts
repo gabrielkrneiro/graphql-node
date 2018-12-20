@@ -43,3 +43,6 @@ export const handleError = (error: Error): Promise<Error> => {
     console.log(errorMessage);
     return Promise.reject(new Error(errorMessage));
 }
+
+// chave secreta 
+export const JWT_SECRET: string = process.env.JWT_SECRET;

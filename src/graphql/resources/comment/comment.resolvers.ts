@@ -42,6 +42,8 @@ export const commentResolvers = {
             info: GraphQLResolveInfo
         ) => {
 
+            postId = parseInt(postId);
+
             return db.Comment
                 .findAll({
                     where: { post: postId },
@@ -106,7 +108,9 @@ export const commentResolvers = {
                     .then((comment: CommentInstance) => {
 
                         if (!comment) throw new Error(`comment with id ${ id } not found`);
-                        return comment.destroy({ transaction }).then(comment => comment);
+                        return comment
+                            .destroy({ transaction })
+                            .then(() => true);
                     })
             })
             .catch(handleError);

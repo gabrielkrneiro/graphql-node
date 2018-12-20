@@ -65,6 +65,8 @@ export const userResolvers = {
             info: GraphQLResolveInfo
         ) => {
 
+            id = parseInt(id);
+
             return db.User
                 .findById(id)
                 .then((user: UserInstance) => {
@@ -92,7 +94,7 @@ export const userResolvers = {
           /**
            *  CREATE
            */
-          createdUser: (
+          createUser: (
               parent,
               { input },
               { db }: { db: DbConnection },
@@ -174,14 +176,16 @@ export const userResolvers = {
                 return db.sequelize.transaction(
                     (transaction: Transaction) => {
 
-                        const user = db.User
+                        return db.User
                             .findById(id)
                             .then(
                                 (user: UserInstance) => {
 
                                     if (!user) throw new Error(`user with id ${ id } not found`);
 
-                                    return user.destroy({ transaction }).then(user => !!user);
+                                    return user
+                                        .destroy({ transaction })
+                                        .then(() => true);
                                 }
                             );
                     }
