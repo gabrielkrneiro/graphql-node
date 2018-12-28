@@ -3,7 +3,11 @@ import { DbConnection } from "../../../interfaces/DBConnectionInterface";
 import { UserInstance } from "../../../models/UserModel";
 import { Transaction } from "sequelize";
 import { userMutations } from "./user.schema";
-import { handleError } from "../../../utils";
+import { handleError, throwError } from "../../../utils";
+import { compose } from "../../composable/composable.resolver";
+import { authResolver, authResolvers } from "../../composable/auth.resolver";
+import { verifyTokenResolver } from "../../composable/verify-token.resolver";
+import { AuthUser } from "../../../interfaces/AuthUserInterface";
 
 /**
  * 
@@ -43,6 +47,11 @@ export const userResolvers = {
      *     user(id: ID!): User
      */
     Query: {
+
+        /**
+         *  just adding compose(), we are executing authResolver and if everything is ok,
+         *  keep the flow, passing the request to the next function. I mean, protecting users with authResolver
+         */
         users: (
             parent, 
             { first = 10, offset = 0 }, // pegando o first e offset do parametro da requisicao (args)
@@ -113,47 +122,46 @@ export const userResolvers = {
 
           /**
            *  UPDATE
-           * Comments: Using async await instead default way as above
+           *  Comments: Using async await instead default way as above
+           *  firstly, check if there`s a user authenticated and if the token
+           *  passed throug request headers is valid
            */
-          updateUser: (
+          updateUser: compose(...authResolvers)((
             parent,
-            { id, input },
-            { db }: { db: DbConnection },
+            { input },
+            { db, authUser }: { db: DbConnection, authUser: AuthUser },
             info: GraphQLResolveInfo
           ) => {
-
-            id = parseInt(id);
 
             return db.sequelize.transaction(
                 async (transaction: Transaction) => {
 
-                    const user: UserInstance = await db.User.findById(id);
+                    const user: UserInstance = await db.User.findById(authUser.id);
 
-                    if(!user) throw new Error(`user with id ${ id } not found`);
+                    throwError(!user, `user with id ${ authUser.id } not found`);
 
                     return user.update(input, { transaction })
                 }
             )
             .catch(handleError);
-          },
+          }),
 
           /**
            *  UPDATE PASSWORD
            */
-
-           updateUserPassword: (
+           updateUserPassword: compose(...authResolvers)((
                parent,
-               { id, input },
-               { db }: { db: DbConnection },
+               { input },
+               { db, authUser }: { db: DbConnection, authUser: AuthUser },
                info: GraphQLResolveInfo
            ) => {
 
                 return db.sequelize.transaction(
                     async (transaction: Transaction) => {
 
-                        const user: UserInstance = await db.User.findById(id);
+                        const user: UserInstance = await db.User.findById(authUser.id);
 
-                        if(!user) throw new Error(`user with id ${ id } not found`);
+                        throwError(!user, `user with id ${ authUser.id } not found`);
 
                         return user
                             .update(input, { transaction })
@@ -161,15 +169,15 @@ export const userResolvers = {
                     }
                 ) 
                 .catch(handleError);
-           },
+           }),
 
            /**
             *   DELETE
             */
-           deleteUser: (
+           deleteUser: compose(...authResolvers)((
                parent,
-               { id },
-               { db }: { db: DbConnection },
+               args,
+               { db, authUser }: { db: DbConnection, authUser: AuthUser },
                info: GraphQLResolveInfo
            ) => {
 
@@ -177,11 +185,11 @@ export const userResolvers = {
                     (transaction: Transaction) => {
 
                         return db.User
-                            .findById(id)
+                            .findById(authUser.id)
                             .then(
                                 (user: UserInstance) => {
 
-                                    if (!user) throw new Error(`user with id ${ id } not found`);
+                                    throwError(!user, `user with id ${ authUser.id } not found`);
 
                                     return user
                                         .destroy({ transaction })
@@ -191,7 +199,7 @@ export const userResolvers = {
                     }
                 )
                 .catch(handleError);
-           },
+           }),
 
 
      }
