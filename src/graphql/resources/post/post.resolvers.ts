@@ -2,7 +2,10 @@ import { DbConnection } from '../../../interfaces/DBConnectionInterface';
 import { GraphQLResolveInfo } from 'graphql';
 import { PostInstance } from '../../../models/PostModel';
 import { Transaction } from 'sequelize';
-import { handleError } from '../../../utils';
+import { handleError, throwError } from '../../../utils';
+import { compose } from '../../composable/composable.resolver';
+import { authResolvers } from '../../composable/auth.resolver';
+import { AuthUser } from '../../../interfaces/AuthUserInterface';
 
 export const postResolvers = {
 
@@ -73,7 +76,7 @@ export const postResolvers = {
                 .then(
                     (post: PostInstance) => {
 
-                        if (!post) throw new Error(`Post with id ${ id } not found!`);
+                        throwError(!post, `Post with id ${ id } not found!`);
                         return post;
                     }
                 )
@@ -87,13 +90,14 @@ export const postResolvers = {
 
      Mutation : {
 
-        createPost: (
+        createPost: compose(...authResolvers)((
             parent,
             { input },
-            { db }: { db: DbConnection },
+            { db, authUser }: { db: DbConnection, authUser: AuthUser },
             info: GraphQLResolveInfo
         ) => {
 
+            input.author = authUser.id;
             return db.sequelize.transaction(
                 (transaction: Transaction) => {
 
@@ -102,15 +106,15 @@ export const postResolvers = {
                 }
             )
             .catch(handleError);
-        },
+        }),
 
-        updatePost: (
-            parent,
+        updatePost: compose(...authResolvers)((
+            parent, 
             { id, input },
-            { db }: { db: DbConnection },
+            { db, authUser }: { db: DbConnection, authUser: AuthUser },
             info: GraphQLResolveInfo
         ) => {
-
+            input.author = authUser.
             id = parseInt(id);
 
             return db.sequelize.transaction(
@@ -121,19 +125,21 @@ export const postResolvers = {
                         .then(
                             (post: PostInstance) => {
 
-                                if (!post) throw new Error(`Post with id ${ id } not found!`);
+                                throwError(!post, `Post with id ${ id } not found!`); 
+                                throwError(post.get('author') != authUser.id, `Unaunthorized! You can just update your own posts`); 
 
+                                input.author = authUser.id;
                                 return post.update(input, { transaction })
                             }
                         )
             })
             .catch(handleError);
-        },
+        }),
 
-        deletePost: (
+        deletePost: compose(...authResolvers)((
             parent,
             { id, input },
-            { db }: { db: DbConnection },
+            { db, authUser }: { db: DbConnection, authUser: AuthUser },
             info: GraphQLResolveInfo
         ) => {
 
@@ -147,8 +153,8 @@ export const postResolvers = {
                         .then(
                             (post: PostInstance) => {
 
-                                if (!post) throw new Error(`Post with id ${ id } not found!`);
-
+                                throwError(!post, `Post with id ${ id } not found!`);
+                                throwError(post.get('author') != authUser.id, `Unaunthorized! You can just delete your own posts`); 
 
                                 // should be .then(post => !!post)
                                 return post
@@ -158,7 +164,7 @@ export const postResolvers = {
                         )
             })
             .catch(handleError);
-        }
+        })
      }
 
 }

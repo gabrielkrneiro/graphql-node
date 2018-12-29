@@ -2,7 +2,10 @@ import { DbConnection } from "../../../interfaces/DBConnectionInterface";
 import { GraphQLResolveInfo } from "graphql";
 import { CommentInstance } from "../../../models/CommentModel";
 import { Transaction } from "sequelize";
-import { handleError } from "../../../utils";
+import { handleError, throwError } from "../../../utils";
+import { compose } from "../../composable/composable.resolver";
+import { authResolvers } from "../../composable/auth.resolver";
+import { AuthUser } from "../../../interfaces/AuthUserInterface";
 
 export const commentResolvers = {
 
@@ -56,26 +59,27 @@ export const commentResolvers = {
 
     Mutation: {
 
-        createComment: (
+        createComment: compose(...authResolvers)((
             parent,
             { input },
-            { db }: { db: DbConnection },
+            { db, authUser }: { db: DbConnection, authUser: AuthUser },
             info: GraphQLResolveInfo
         ) => {
             
             return db.sequelize.transaction(
                 (transaction: Transaction) => {
                     
+                    input.user = authUser.id;
                     return db.Comment.create(input, { transaction });
                 }
             )
             .catch(handleError);
-        },
+        }),
 
-        updateComment: (
+        updateComment: compose(...authResolvers)((
             parent,
             { id, input },
-            { db }: { db: DbConnection },
+            { db, authUser }: { db: DbConnection, authUser: AuthUser },
             info: GraphQLResolveInfo
         ) => {
 
@@ -86,17 +90,20 @@ export const commentResolvers = {
                     .findById(id)
                     .then((comment: CommentInstance) => {
 
-                        if (!comment) throw new Error(`comment with id ${ id } not found`);
+                        input.user = authUser.id;
+                        throwError(!comment, `Comment with id ${ id } not found.`);
+                        throwError(comment.get('user') != authUser.id, `Unaunthorized!`);
+
                         return comment.update(input, { transaction });
                     });
             })
             .catch(handleError);
-        },
+        }),
 
-        deleteComment: (
+        deleteComment: compose(...authResolvers)((
             parent,
             { id },
-            { db }: { db: DbConnection },
+            { db, authUser }: { db: DbConnection, authUser: AuthUser },
             info: GraphQLResolveInfo
         ) => {
 
@@ -107,13 +114,15 @@ export const commentResolvers = {
                     .findById(id)
                     .then((comment: CommentInstance) => {
 
-                        if (!comment) throw new Error(`comment with id ${ id } not found`);
+                        throwError(!comment, `Comment with id ${ id } not found.`);
+                        throwError(comment.get('user') != authUser.id, `Unaunthorized!`);
+                        
                         return comment
                             .destroy({ transaction })
                             .then(() => true);
                     })
             })
             .catch(handleError);
-        }
+        })
     }
 }
