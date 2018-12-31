@@ -1,3 +1,5 @@
+import * as graphqlFields from 'graphql-fields';
+
 import { DbConnection } from '../../../interfaces/DBConnectionInterface';
 import { GraphQLResolveInfo } from 'graphql';
 import { PostInstance } from '../../../models/PostModel';
@@ -66,7 +68,10 @@ export const postResolvers = {
         ) => {
 
             return db.Post
-                .findAll({ limit: first, offset })
+                .findAll({
+                    limit: first, 
+                    offset 
+                })
                 .catch(handleError);
         },
 
