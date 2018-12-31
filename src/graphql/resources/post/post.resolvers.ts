@@ -9,6 +9,8 @@ import { compose } from '../../composable/composable.resolver';
 import { authResolvers } from '../../composable/auth.resolver';
 import { AuthUser } from '../../../interfaces/AuthUserInterface';
 import { DataLoaders } from '../../../interfaces/DataLoadersInterface';
+import { RequestedFields } from '../../ast/RequestedFields';
+import { ResolverContext } from '../../../interfaces/ResolverContextInterface';
 
 export const postResolvers = {
 
@@ -42,13 +44,14 @@ export const postResolvers = {
         comments: (
             parent: PostInstance,
             args,
-            { db }: { db: DbConnection },
+            { db, requestedFields }: { db: DbConnection, requestedFields: RequestedFields },
             info: GraphQLResolveInfo
         ) => {
 
             return db.Comment
                 .findAll({
-                    where: { post: parent.get('id') }
+                    where: { post: parent.get('id') },
+                    attributes: requestedFields.getFields(info)
                 })
                 .catch(handleError);
 
@@ -63,14 +66,15 @@ export const postResolvers = {
         posts: (
             parent,
             { first = 10, offset = 0 },
-            { db }: { db: DbConnection },
+            context: ResolverContext,
             info: GraphQLResolveInfo
         ) => {
 
-            return db.Post
+            return context.db.Post
                 .findAll({
                     limit: first, 
-                    offset 
+                    offset,
+                    attributes: context.requestedFields.getFields(info, { keep: ['id'], exclude: ['comments'] })
                 })
                 .catch(handleError);
         },
@@ -78,14 +82,16 @@ export const postResolvers = {
         post: (
             parent,
             { id },
-            { db }: { db: DbConnection },
+            context: ResolverContext,
             info: GraphQLResolveInfo
         ) => {
 
             id = parseInt(id);
 
-            return db.Post
-                .findById(id)
+            return context.db.Post
+                .findById(id, {
+                    attributes: context.requestedFields.getFields(info, { keep: ['id'], exclude: ['comments'] })
+                })
                 .then(
                     (post: PostInstance) => {
 
