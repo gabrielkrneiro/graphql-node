@@ -19,6 +19,9 @@ export const commentResolvers = {
             info: GraphQLResolveInfo
         ) => {
 
+            /**
+             *  Using data loaders to get the data in batch
+             */
             return userLoader
                 .load(comment.get('user'))
                 .catch(handleError);

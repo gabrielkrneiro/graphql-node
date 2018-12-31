@@ -80,7 +80,8 @@ export const userResolvers = {
                 .findById(id)
                 .then((user: UserInstance) => {
 
-                    throwError(!user, `User with id ${ id } not found`);
+                    console.log();
+                    throwError(user.id == null, `User with id ${ id } not found`);
 
                     return user;
                 })
