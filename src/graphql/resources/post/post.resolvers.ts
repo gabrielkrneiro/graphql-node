@@ -1,3 +1,5 @@
+import * as graphqlFields from 'graphql-fields';
+
 import { DbConnection } from '../../../interfaces/DBConnectionInterface';
 import { GraphQLResolveInfo } from 'graphql';
 import { PostInstance } from '../../../models/PostModel';
@@ -6,6 +8,9 @@ import { handleError, throwError } from '../../../utils';
 import { compose } from '../../composable/composable.resolver';
 import { authResolvers } from '../../composable/auth.resolver';
 import { AuthUser } from '../../../interfaces/AuthUserInterface';
+import { DataLoaders } from '../../../interfaces/DataLoadersInterface';
+import { RequestedFields } from '../../ast/RequestedFields';
+import { ResolverContext } from '../../../interfaces/ResolverContextInterface';
 
 export const postResolvers = {
 
@@ -15,30 +20,38 @@ export const postResolvers = {
     Post: {
 
         author: (
-            parent: PostInstance,
+            post: PostInstance,
             args,
-            { db }: { db: DbConnection },
-            { db: DbConnection },
+            { db, dataloaders: { userLoader } }: { db: DbConnection, dataloaders: DataLoaders },
             info: GraphQLResolveInfo
         ) => {
-            // parent == current post instance
-            // aqui o author == number == author.id
-            return db.User
-                .findById(parent.get('author'))
+
+            return userLoader
+                .load(post.get('author'))
                 .catch(handleError);
+            /**
+             *  solution bellow doesn`t returns informations in batch, and this is a problema 
+             *  in a optimization point of view. `Cause this, the solution above has been implemented.
+             *
+             * parent == current post instance
+             * aqui o author == number == author.id
+             * return db.User
+             *     .findById(parent.get('author'))
+             *     .catch(handleError);
+             */
         },
 
         comments: (
             parent: PostInstance,
             args,
-            { db }: { db: DbConnection },
-            { db: DbConnection },
+            { db, requestedFields }: { db: DbConnection, requestedFields: RequestedFields },
             info: GraphQLResolveInfo
         ) => {
 
             return db.Comment
                 .findAll({
-                    where: { post: parent.get('id') }
+                    where: { post: parent.get('id') },
+                    attributes: requestedFields.getFields(info)
                 })
                 .catch(handleError);
 
@@ -53,26 +66,32 @@ export const postResolvers = {
         posts: (
             parent,
             { first = 10, offset = 0 },
-            { db }: { db: DbConnection },
+            context: ResolverContext,
             info: GraphQLResolveInfo
         ) => {
 
-            return db.Post
-                .findAll({ limit: first, offset })
+            return context.db.Post
+                .findAll({
+                    limit: first, 
+                    offset,
+                    attributes: context.requestedFields.getFields(info, { keep: ['id'], exclude: ['comments'] })
+                })
                 .catch(handleError);
         },
 
         post: (
             parent,
             { id },
-            { db }: { db: DbConnection },
+            context: ResolverContext,
             info: GraphQLResolveInfo
         ) => {
 
             id = parseInt(id);
 
-            return db.Post
-                .findById(id)
+            return context.db.Post
+                .findById(id, {
+                    attributes: context.requestedFields.getFields(info, { keep: ['id'], exclude: ['comments'] })
+                })
                 .then(
                     (post: PostInstance) => {
 

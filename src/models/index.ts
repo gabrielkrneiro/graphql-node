@@ -18,9 +18,12 @@ if (!db) {
 
     db = {};
 
-    // motivo: please use symbol based operators for better security...
-    // solucao: desativar a necessidade de usar tais operadores
-    const operatorAliases = false;
+    //  motivo: please use symbol based operators for better security...
+    //  solucao: se nao estiver usando nenhum operator, desativar a 
+    //  necessidade de usar tais operadores
+    const operatorAliases = { 
+        $in: Sequelize.Op.in // Ex.: [2, 4, 7, 10] -> procura registros com esses IDs
+     };
     config = Object.assign({ operatorAliases }, config)
 
     const sequelize: Sequelize.Sequelize = new Sequelize(
