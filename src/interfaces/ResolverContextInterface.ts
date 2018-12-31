@@ -12,5 +12,5 @@ export interface ResolverContext {
     authorization?: string;
     authUser?: AuthUser;
     dataLoaders?: DataLoaders;
-    requestedFields: RequestedFields;
+    requestedFields?: RequestedFields;
 }
