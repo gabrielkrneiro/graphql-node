@@ -6,6 +6,7 @@ import { handleError, throwError } from '../../../utils';
 import { compose } from '../../composable/composable.resolver';
 import { authResolvers } from '../../composable/auth.resolver';
 import { AuthUser } from '../../../interfaces/AuthUserInterface';
+import { DataLoaders } from '../../../interfaces/DataLoadersInterface';
 
 export const postResolvers = {
 
@@ -15,24 +16,31 @@ export const postResolvers = {
     Post: {
 
         author: (
-            parent: PostInstance,
+            post: PostInstance,
             args,
-            { db }: { db: DbConnection },
-            { db: DbConnection },
+            { db, dataloaders: { userLoader } }: { db: DbConnection, dataloaders: DataLoaders },
             info: GraphQLResolveInfo
         ) => {
-            // parent == current post instance
-            // aqui o author == number == author.id
-            return db.User
-                .findById(parent.get('author'))
+
+            return userLoader
+                .load(post.get('author'))
                 .catch(handleError);
+            /**
+             *  solution bellow doesn`t returns informations in batch, and this is a problema 
+             *  in a optimization point of view. `Cause this, the solution above has been implemented.
+             *
+             * parent == current post instance
+             * aqui o author == number == author.id
+             * return db.User
+             *     .findById(parent.get('author'))
+             *     .catch(handleError);
+             */
         },
 
         comments: (
             parent: PostInstance,
             args,
             { db }: { db: DbConnection },
-            { db: DbConnection },
             info: GraphQLResolveInfo
         ) => {
 
