@@ -27,7 +27,7 @@ export const postResolvers = {
         ) => {
 
             return userLoader
-                .load(post.get('author'))
+                .load({ key: post.get('author'), info }) // id do autor
                 .catch(handleError);
             /**
              *  solution bellow doesn`t returns informations in batch, and this is a problema 
