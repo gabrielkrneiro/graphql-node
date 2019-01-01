@@ -22,7 +22,7 @@ class App {
 
     private init(): void {
 
-        this.dataLoaderFactory = new DataLoaderFactory(db);
+        this.dataLoaderFactory = new DataLoaderFactory(db, this.requestedFields);
         this.requestedFields = new RequestedFields();
         this.middleware();
     }

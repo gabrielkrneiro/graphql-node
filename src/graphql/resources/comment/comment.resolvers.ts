@@ -24,7 +24,7 @@ export const commentResolvers = {
              *  Using data loaders to get the data in batch
              */
             return userLoader
-                .load(comment.get('user'))
+                .load({ key: comment.get('user'), info })
                 .catch(handleError);
 
             // return db.User
@@ -40,8 +40,8 @@ export const commentResolvers = {
         ) => {
 
             return postLoader
-                .load(comment.get('post'))
-                .catch(handleError);
+            .load({ key: comment.get('post'), info })
+            .catch(handleError);
 
             // return db.Post
             //     .findById(comment.get('post'))
