@@ -9,6 +9,9 @@ import { PostLoader } from './PostLoader';
 import { RequestedFields } from '../graphql/ast/RequestedFields';
 import { DataLoaderParam } from '../interfaces/DataLoarderParamInterface';
 
+/**
+ *  return loaders to get the data in batch according to "T"instances
+ */
 export class DataLoaderFactory {
 
     constructor(
