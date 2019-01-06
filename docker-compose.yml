@@ -13,7 +13,7 @@ services:
     volumes: 
       - /etc/mysql:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=dbaunlocked28
+      - MYSQL_ROOT_PASSWORD=YOUR_PASSWORD
       - MYSQL_DATABASE=graphql_node
 
   
