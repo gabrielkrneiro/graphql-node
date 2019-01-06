@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as Sequelize from 'sequelize';
+
 import { DbConnection } from '../interfaces/DBConnectionInterface';
 
 // getting current file reference
@@ -18,9 +19,11 @@ if (!db) {
 
     db = {};
 
-    //  motivo: please use symbol based operators for better security...
-    //  solucao: se nao estiver usando nenhum operator, desativar a 
-    //  necessidade de usar tais operadores
+    /*  
+    *  motivo: please use symbol based operators for better security...
+    *  solucao: se nao estiver usando nenhum operator, desativar a 
+    *  necessidade de usar tais operadores
+    */
     const operatorAliases = { 
         $in: Sequelize.Op.in // Ex.: [2, 4, 7, 10] -> procura registros com esses IDs
      };
@@ -41,8 +44,10 @@ if (!db) {
             *   - o primeiro caractere do nome do arquivo nao pode ser .
             *   - o arquivo nao pode ser igual ao nome do arquivo atual (basename)
             *   - a extensao do arquivo precisa ser igual a .js
+            *   Obs.: .ts foi adicionado para permitir a execucao dos testes no ambiente de teste
             */
-            return (file.indexOf('.') !== 0 && (file !== basename) && (file.slice(-3) === '.js'))
+            const fileSlice: string = file.slice(-3);
+            return (file.indexOf('.') !== 0) && (file !== basename) && ((fileSlice === '.js') || (fileSlice === '.ts'));
         })
         .forEach((file: string) => {
 

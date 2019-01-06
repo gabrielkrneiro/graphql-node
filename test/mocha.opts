@@ -3,4 +3,4 @@
 --low 5000
 --exit
 --delay
-test/**/*.test.ts
+test/**/*.spec.ts
