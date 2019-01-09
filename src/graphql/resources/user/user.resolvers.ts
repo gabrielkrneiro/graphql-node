@@ -85,8 +85,8 @@ export const userResolvers = {
                 })
                 .then((user: UserInstance) => {
 
-                    console.log();
-                    throwError(user.id == null, `User with id ${ id } not found`);
+                    // console.log();
+                    throwError(!user, `User with id ${ id } not found`);
 
                     return user;
                 })

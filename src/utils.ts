@@ -46,7 +46,8 @@ export const handleError = (error: Error): Promise<Error> => {
 
 
 export const throwError = (condition: boolean, message: string): void => {
-    if (!condition) throw new Error(message);
+    if (condition) throw new Error(message);
+    // if (!condition) throw new Error(message);
 }
 
 // chave secreta 

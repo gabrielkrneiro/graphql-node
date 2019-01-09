@@ -13,10 +13,11 @@ services:
     volumes: 
       - /etc/mysql:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=YOUR_PASSWORD
-      - MYSQL_DATABASE=graphql_node
 
-  
+      - MYSQL_ROOT_PASSWORD=dbaunlocked28
+      - MYSQL_DATABASE=graphql_blog
+
+
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
     container_name: phpmyadmin
@@ -26,4 +27,25 @@ services:
     depends_on:
       - db
     links: 
-      - db
+      - db:db
+
+  db_test:
+    image: mariadb
+    container_name: mariadb_test
+    restart: always
+    ports:
+      - 3307:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=dbaunlocked28
+      - MYSQL_DATABASE=graphql_blog
+
+  phpmyadmin_test:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin_test
+    restart: always
+    ports:
+      - 8082:80
+    depends_on:
+      - db_test
+    links:
+      - db_test:db

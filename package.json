@@ -5,18 +5,22 @@
   "main": "index.js",
   "scripts": {
     "gulp": "gulp",
-    "dev": "NODE_ENV=development JWT_SECRET=iron_man nodemon --delay 5 dist/index.js"
+    "dev": "NODE_ENV=development JWT_SECRET=iron_man nodemon --delay 5 dist/index.js",
+    "test": "NODE_ENV=test JWT_SECRET=jwt_test mocha"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
+    "@types/chai": "^4.1.7",
+    "@types/chai-http": "^3.0.5",
     "@types/express": "^4.16.0",
     "@types/express-graphql": "^0.6.2",
     "@types/graphql": "^14.0.3",
     "@types/jsonwebtoken": "^8.3.0",
     "@types/lodash": "^4.14.119",
+    "@types/mocha": "^5.2.5",
     "@types/node": "^10.12.12",
     "@types/sequelize": "^4.27.32",
     "graph-tools": "^0.1.2",
@@ -24,10 +28,13 @@
     "gulp-clean": "^0.4.0",
     "gulp-typescript": "^5.0.0",
     "nodemon": "^1.18.7",
+    "ts-node": "^7.0.1",
     "typescript": "^3.2.2"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "chai": "^4.2.0",
+    "chai-http": "^4.2.0",
     "dataloader": "^1.4.0",
     "express": "^4.16.4",
     "express-graphql": "^0.7.1",
@@ -36,6 +43,7 @@
     "graphql-tools": "^4.0.3",
     "jsonwebtoken": "^8.4.0",
     "lodash": "^4.17.11",
+    "mocha": "^5.2.0",
     "mysql2": "^1.6.4",
     "sequelize": "^4.41.2"
   }

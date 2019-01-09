@@ -1,12 +1,14 @@
-import express = require('express');
-import { Application } from "express";
 import * as graphqlHTTP from 'express-graphql';
 
-import db from './models'
-import schema from './graphql/schema';
-import { extractJwtMiddleware } from './middlewares/extract-jwt.middleware';
+import express = require('express');
+import { Application } from "express";
+
+import db from './models';
 import { DataLoaderFactory } from './dataloaders/DataLoaderFactory';
 import { RequestedFields } from './graphql/ast/RequestedFields';
+import { extractJwtMiddleware } from './middlewares/extract-jwt.middleware';
+import schema from './graphql/schema';
+
 
 class App {
 
