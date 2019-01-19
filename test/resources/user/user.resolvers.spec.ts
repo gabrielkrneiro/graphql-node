@@ -1,8 +1,10 @@
-import { db, chai, expect, handleError, app } from '../../test-utils';
-import * as gql from 'graphql-tools';
-import { UserInstance, UserAttributes } from '../../../src/models/UserModel';
 import * as jwt from 'jsonwebtoken';
+
+import { db, chai, expect, handleError, app } from '../../test-utils';
+import { UserInstance, UserAttributes } from '../../../src/models/UserModel';
 import { JWT_SECRET } from '../../../src/utils';
+
+const ENDPOINT = '/graphql';
 
 interface MockInterface {
     name: string;
@@ -24,7 +26,6 @@ const MOCKS: MockInterface[] = [
     }
 ];
 
-const ENDPOINT = '/graphql';
 
 describe('User', () => {
 
@@ -270,12 +271,6 @@ describe('User', () => {
 
                 it('should update and existing user', () => {
 
-                    // let input: {
-                    //     name: 'gabriel carneiro',
-                    //     email: 'gabriel@carneiro.com',
-                    //     photo: 'some_photo',
-                    // }
-
                     let body = {
                         query: `
                             mutation updateExistingUser($input: UserUpdateInput!) {
@@ -302,8 +297,6 @@ describe('User', () => {
                         .then(
                             res => {
 
-                                console.log(res);
-
                                 const updatedUser: MockInterface = res.body.data.updateUser;
 
                                 expect(updatedUser).to.be.an('object');
@@ -312,6 +305,102 @@ describe('User', () => {
                                 expect(updatedUser.photo).to.not.be.null;
                             }
                         ).catch(handleError);
+                });
+
+                it('should block if token is invalid', () => {
+
+                    let body = {
+                        query: `
+                            mutation updateExistingUser($input: UserUpdateInput!) {
+                                updateUser(input: $input) {
+                                    name
+                                    email
+                                }
+                            }
+                        `,
+                        variables: {
+                            input: {
+                                name: 'gabriel carneiro',
+                                email: 'gabriel@gmail.com',
+                                photo: 'some_photo'
+                            }
+                        }
+                    };
+
+                    return chai.request(app)
+                        .post(ENDPOINT)
+                        .set('content-type', 'application/json')
+                        .set('Authorization', `Bearer INVALID TOKEN`)
+                        .send(JSON.stringify(body))
+                        .then(
+                            res => {
+
+                                expect(res.body.data.updateUser).to.be.null;
+                                expect(res.body).to.have.keys(['data', 'errors']);
+                                expect(res.body).to.be.an('object');
+                                expect(res.body.errors[0].message).to.equal('JsonWebTokenError: jwt malformed');
+                            }
+                        ).catch(handleError);
+                });
+
+            });
+
+            describe('updateUserPassword', () => {
+
+                it('should update password', () => {
+
+                    let body = {
+                        query: `
+                            mutation updateUserPassword($input: UserUpdatePasswordInput!) {
+                                updateUserPassword(input: $input)
+                            }
+                        `,
+                        variables: {
+                            input: {
+                                password: "123123"
+                            }
+                        }
+                    };
+
+                    return chai.request(app)
+                        .post(ENDPOINT)
+                        .set('content-type', 'application/json')
+                        .set('Authorization', `Bearer ${ token }`)
+                        .send(JSON.stringify(body))
+                        .then(
+                            res => {
+
+                                expect(res.body.data.updateUserPassword).to.be.true;                             
+                            }
+                        ).catch(handleError);
+
+                });
+            });
+
+            describe('deleteUser', () => {
+
+                it('should delete existing user', () => {
+
+                    let body = {
+                        query: `
+                            mutation {
+                                deleteUser
+                            }
+                        `
+                    };
+
+                    return chai.request(app)
+                        .post(ENDPOINT)
+                        .set('content-type', 'application/json')
+                        .set('Authorization', `Bearer ${ token }`)
+                        .send(JSON.stringify(body))
+                        .then(
+                            res => {
+
+                                expect(res.body.data.deleteUser).to.be.true;                             
+                            }
+                        ).catch(handleError);
+
                 });
             });
         });
