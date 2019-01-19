@@ -1,4 +1,5 @@
 import * as graphqlHTTP from 'express-graphql';
+import * as cors from 'cors';
 
 import express = require('express');
 import { Application } from "express";
@@ -30,6 +31,19 @@ class App {
     }
 
     private middleware(): void {
+
+        // enabling cors
+        this.express.use(cors({
+            origin: '*',
+            methods: ['GET', 'POSTS'],
+            allowedHeaders: [
+                'Content-Type',
+                'Authorization',
+                'Accept-Enconding'
+            ],
+            preflightContinue: true,
+            optionsSuccessStatus: 204
+        }));
 
         // coloca a instancia do banco de dados de forma global na aplicacao
         // exportando a instancia no parametro context da aplicacao
