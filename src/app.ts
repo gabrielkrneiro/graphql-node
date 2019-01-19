@@ -1,5 +1,6 @@
 import * as graphqlHTTP from 'express-graphql';
 import * as cors from 'cors';
+import * as compression from 'compression';
 
 import express = require('express');
 import { Application } from "express";
@@ -44,6 +45,9 @@ class App {
             preflightContinue: true,
             optionsSuccessStatus: 204
         }));
+
+        // compression API to GZIP
+        this.express.use(compression());
 
         // coloca a instancia do banco de dados de forma global na aplicacao
         // exportando a instancia no parametro context da aplicacao
