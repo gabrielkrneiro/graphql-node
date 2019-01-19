@@ -1,6 +1,7 @@
 import * as graphqlHTTP from 'express-graphql';
 import * as cors from 'cors';
 import * as compression from 'compression';
+import * as helmet from 'helmet';
 
 import express = require('express');
 import { Application } from "express";
@@ -46,8 +47,11 @@ class App {
             optionsSuccessStatus: 204
         }));
 
-        // compression API to GZIP
+        // compression API to GZIP (optimization)
         this.express.use(compression());
+
+        // configuring helmet (security)
+        this.express.use(helmet());
 
         // coloca a instancia do banco de dados de forma global na aplicacao
         // exportando a instancia no parametro context da aplicacao
