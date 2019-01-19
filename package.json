@@ -4,6 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "clusters": "NODE_ENV=development node dist/clusters",
+    "build": "npm run gulp build",
+    "start": "npm run build && npm run clusters",
     "gulp": "gulp",
     "dev": "NODE_ENV=development JWT_SECRET=iron_man nodemon --delay 5 dist/index.js",
     "test": "NODE_ENV=test JWT_SECRET=jwt_test mocha",
