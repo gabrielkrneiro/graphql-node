@@ -13,8 +13,10 @@ services:
     volumes: 
       - /etc/mysql:/var/lib/mysql
     environment:
+
       - MYSQL_ROOT_PASSWORD=dbaunlocked28
       - MYSQL_DATABASE=graphql_blog
+
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
